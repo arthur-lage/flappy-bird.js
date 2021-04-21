@@ -4,30 +4,60 @@ sprites.src = './sprites.png';
 const canvas = document.querySelector("#game-canvas")
 const ctx = canvas.getContext("2d")
 
+const hitSound = new Audio();
+hitSound.src = 'soundEffects/hit.wav';
+
 const skyColor = "#00B5D2";
 
-const flappyBird = {
-    spriteX: 0,
-    spriteY: 0,
-    width: 33,
-    height: 24,
-    x: 10,
-    y: 50,
-    speed: 0,
-    gravity: .1,
-    update(){
-        flappyBird.speed = flappyBird.speed + flappyBird.gravity;
-        flappyBird.y += flappyBird.speed;
-    },
-    draw(){
-        ctx.drawImage(
-            sprites,
-            flappyBird.spriteX, flappyBird.spriteY,
-            flappyBird.width, flappyBird.height,
-            flappyBird.x, flappyBird.y,
-            flappyBird.width, flappyBird.height,
-        )
+function isColliding(player, objectToCollideWith){
+
+    let playerVerticalPosition = player.y + player.height;
+    let groundVerticalPosition = objectToCollideWith.y;
+
+    if(playerVerticalPosition > groundVerticalPosition){
+        return true;
     }
+
+    return false;
+}
+
+function createFlappyBird(){
+    const flappyBird = {
+        spriteX: 0,
+        spriteY: 0,
+        width: 33,
+        height: 24,
+        x: 10,
+        y: 50,
+        speed: 0,
+        gravity: .1,
+        jumpForce: 4.6,
+        update(){
+            if(isColliding(flappyBird, ground)){
+                hitSound.play();
+                setTimeout(() => {
+                    changeScene(scenes.startScene);
+                }, 500)
+                return;
+            }
+    
+            flappyBird.speed = flappyBird.speed + flappyBird.gravity;
+            flappyBird.y += flappyBird.speed;
+        },
+        draw(){
+            ctx.drawImage(
+                sprites,
+                flappyBird.spriteX, flappyBird.spriteY,
+                flappyBird.width, flappyBird.height,
+                flappyBird.x, flappyBird.y,
+                flappyBird.width, flappyBird.height,
+            )
+        },
+        jump(){
+            flappyBird.speed -= flappyBird.jumpForce;
+        }
+    }
+    return flappyBird;
 }
 
 const ground = {
@@ -108,18 +138,26 @@ const getReadyMessage = {
 // Scenes
 //
 
-let activeScene = {};
+const globais = {};
 
+let activeScene = {};
 function changeScene(newScene){
-    activeScene = newScene;
+    activeScene = newScene; 
+
+    if(activeScene.initialize){
+        activeScene.initialize();
+    }
 }
 
 const scenes = {
     startScene:{
+        initialize(){
+            globais.flappyBird = createFlappyBird();
+        },
         draw(){
             background.draw();
             ground.draw();
-            flappyBird.draw();
+            globais.flappyBird.draw();
             getReadyMessage.draw();
         },
         click(){
@@ -135,13 +173,13 @@ scenes.gameScene = {
     draw(){
         background.draw();
         ground.draw();
-        flappyBird.draw();
+        globais.flappyBird.draw();
     },
     click(){
-        console.log("Pulo")
+        globais.flappyBird.jump();
     },
     update(){
-        flappyBird.update();
+        globais.flappyBird.update();
     }
 }
 

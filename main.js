@@ -13,6 +13,12 @@ const flappyBird = {
     height: 24,
     x: 10,
     y: 50,
+    speed: 0,
+    gravity: .1,
+    update(){
+        flappyBird.speed = flappyBird.speed + flappyBird.gravity;
+        flappyBird.y += flappyBird.speed;
+    },
     draw(){
         ctx.drawImage(
             sprites,
@@ -80,11 +86,77 @@ const background = {
     }
 }
 
+const getReadyMessage = {
+    spriteX: 134,
+    spriteY: 0,
+    width: 174,
+    height: 152,
+    x: (canvas.width / 2) - 174 / 2,
+    y: 50,
+    draw(){
+        ctx.drawImage(
+            sprites,
+            getReadyMessage.spriteX, getReadyMessage.spriteY,
+            getReadyMessage.width, getReadyMessage.height,
+            getReadyMessage.x, getReadyMessage.y,
+            getReadyMessage.width, getReadyMessage.height,
+        )
+    }
+}
+
+//
+// Scenes
+//
+
+let activeScene = {};
+
+function changeScene(newScene){
+    activeScene = newScene;
+}
+
+const scenes = {
+    startScene:{
+        draw(){
+            background.draw();
+            ground.draw();
+            flappyBird.draw();
+            getReadyMessage.draw();
+        },
+        click(){
+            changeScene(scenes.gameScene);
+        },
+        update(){
+
+        }
+    }
+}
+
+scenes.gameScene = {
+    draw(){
+        background.draw();
+        ground.draw();
+        flappyBird.draw();
+    },
+    click(){
+        console.log("Pulo")
+    },
+    update(){
+        flappyBird.update();
+    }
+}
+
 function loop(){
-    background.draw();
-    ground.draw();
-    flappyBird.draw();
+    activeScene.draw();
+    activeScene.update();
+    
     requestAnimationFrame(loop);
 }
 
-loop()
+window.addEventListener("click", () => {
+    if(activeScene.click()){
+        activeScene.click();
+    }
+})
+
+changeScene(scenes.startScene)
+loop();

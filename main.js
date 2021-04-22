@@ -1,6 +1,8 @@
 const sprites = new Image();
 sprites.src = './sprites.png';
 
+let frames = 0;
+
 const canvas = document.querySelector("#game-canvas")
 const ctx = canvas.getContext("2d")
 
@@ -33,7 +35,7 @@ function createFlappyBird(){
         gravity: .1,
         jumpForce: 4.6,
         update(){
-            if(isColliding(flappyBird, ground)){
+            if(isColliding(flappyBird, globais.ground)){
                 hitSound.play();
                 setTimeout(() => {
                     changeScene(scenes.startScene);
@@ -44,10 +46,31 @@ function createFlappyBird(){
             flappyBird.speed = flappyBird.speed + flappyBird.gravity;
             flappyBird.y += flappyBird.speed;
         },
+        animationSprites: [
+            {spriteX: 0, spriteY: 0},
+            {spriteX: 0, spriteY: 26},
+            {spriteX: 0, spriteY: 52},
+            {spriteX: 0, spriteY: 26},
+        ],
+        currentFrame: 0,
+        updateFrame(){
+            const framesInterval = 10;
+            const reachedIntervalTime = frames % framesInterval === 0;
+
+            if(reachedIntervalTime){
+                const valueToIncrement = 1;
+                const increment = valueToIncrement + flappyBird.currentFrame;
+                const timesToRepeat = flappyBird.animationSprites.length;
+                flappyBird.currentFrame = increment % timesToRepeat;
+            }
+        },
         draw(){
+            flappyBird.updateFrame();
+            const { spriteX, spriteY } = flappyBird.animationSprites[flappyBird.currentFrame]
+
             ctx.drawImage(
                 sprites,
-                flappyBird.spriteX, flappyBird.spriteY,
+                spriteX, spriteY,
                 flappyBird.width, flappyBird.height,
                 flappyBird.x, flappyBird.y,
                 flappyBird.width, flappyBird.height,
@@ -60,31 +83,41 @@ function createFlappyBird(){
     return flappyBird;
 }
 
-const ground = {
-    spriteX: 0,
-    spriteY: 610,
-    width: 224,
-    height: 112,
-    x: 0,
-    y: canvas.height - 112,
-    draw(){
-        ctx.drawImage(
-            sprites,
-            ground.spriteX, ground.spriteY,
-            ground.width, ground.height,
-            ground.x, ground.y,
-            ground.width, ground.height,
-        )
+function createGround(){
+    const ground = {
+        spriteX: 0,
+        spriteY: 610,
+        width: 224,
+        height: 112,
+        x: 0,
+        y: canvas.height - 112,
+        update(){
+            const groundMovementSpeed = 1;
+            const repeatIn = ground.width / 2;
+            const movement = ground.x - groundMovementSpeed;
 
-        ctx.drawImage(
-            sprites,
-            ground.spriteX, ground.spriteY,
-            ground.width, ground.height,
-            (ground.x + ground.width), ground.y,
-            ground.width, ground.height,
-        )
+            ground.x = movement % repeatIn;
+        },
+        draw(){
+            ctx.drawImage(
+                sprites,
+                ground.spriteX, ground.spriteY,
+                ground.width, ground.height,
+                ground.x, ground.y,
+                ground.width, ground.height,
+            )
+    
+            ctx.drawImage(
+                sprites,
+                ground.spriteX, ground.spriteY,
+                ground.width, ground.height,
+                (ground.x + ground.width), ground.y,
+                ground.width, ground.height,
+            )
+        }
     }
-}
+    return ground;
+};
 
 const background = {
     spriteX: 390,
@@ -153,10 +186,11 @@ const scenes = {
     startScene:{
         initialize(){
             globais.flappyBird = createFlappyBird();
+            globais.ground = createGround();
         },
         draw(){
             background.draw();
-            ground.draw();
+            globais.ground.draw();
             globais.flappyBird.draw();
             getReadyMessage.draw();
         },
@@ -164,7 +198,7 @@ const scenes = {
             changeScene(scenes.gameScene);
         },
         update(){
-
+            globais.ground.update();
         }
     }
 }
@@ -172,7 +206,7 @@ const scenes = {
 scenes.gameScene = {
     draw(){
         background.draw();
-        ground.draw();
+        globais.ground.draw();
         globais.flappyBird.draw();
     },
     click(){
@@ -180,12 +214,15 @@ scenes.gameScene = {
     },
     update(){
         globais.flappyBird.update();
+        globais.ground.update();
     }
 }
 
 function loop(){
     activeScene.draw();
     activeScene.update();
+
+    frames += 1;
     
     requestAnimationFrame(loop);
 }

@@ -83,45 +83,6 @@ function createFlappyBird(){
     return flappyBird;
 }
 
-function createPipe(){
-    const pipe = {
-        width: 52,
-        height: 400,
-        sky: {
-            spriteX: 0,
-            spriteY: 196,
-        },
-        ground: {
-            spriteX: 52,
-            spriteY: 196,
-        },
-        gap: 80,
-        draw(){
-            const skyPipeX = 220;
-            const skyPipeY = 0;
-
-            ctx.drawImage(
-                sprites,
-                pipe.sky.spriteX, pipe.sky.spriteY,
-                pipe.width, pipe.height,
-                skyPipeX, skyPipeY,
-                pipe.width, pipe.height
-            )
-
-            const groundPipeX = 220;
-            const groundPipeY = 0;
-
-            ctx.drawImage(
-                sprites,
-                pipe.ground.spriteX, pipe.ground.spriteY,
-                pipe.width, pipe.height,
-                groundPipeX, groundPipeY,
-                pipe.width, pipe.height
-            )
-        }
-    }
-}
-
 function createGround(){
     const ground = {
         spriteX: 0,
@@ -226,14 +187,12 @@ const scenes = {
         initialize(){
             globais.flappyBird = createFlappyBird();
             globais.ground = createGround();
-            globais.pipe = createPipe();
         },
         draw(){
             background.draw();
             globais.ground.draw();
             globais.flappyBird.draw();
-            globais.pipe.draw();
-            // getReadyMessage.draw();
+            getReadyMessage.draw();
         },
         click(){
             changeScene(scenes.gameScene);

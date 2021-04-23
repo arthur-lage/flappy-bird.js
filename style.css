@@ -1,12 +1,84 @@
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
 body{
     min-height: 100vh;
+
     display: flex;
     justify-content: center;
     align-items: center;
+
+    background: url('bg.jpg') no-repeat;
+    background-size: cover;
 }
 
 canvas{
     border: 1px solid #000;
+    border-radius: 5px;
+
     display: block;
+
     margin: 0 auto;
+}
+
+.phone-container{
+    background-color: #313131;
+    box-shadow: 0px 0px 15px rgba(0,0,0,1);
+    border: 1px solid black;
+    border-radius: 10px;
+
+    position: absolute;
+    
+    width: 375px;
+    height: 560px;
+
+    z-index: -5;
+}
+
+.frontal-camera-container{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    margin-top: 10px;
+}
+
+.frontal-camera-container div{
+    margin: 0 1rem;
+}
+
+.flash, .camera{
+    border-radius: 50%;
+    background-color: rgb(190, 186, 173);
+    border: 1px solid black;
+
+    width: 17.5px;
+    height: 17.5px;
+}
+
+.flash-ball, .camera-ball{
+    background-color: rgb(224, 201, 125);
+    border-radius: 50%;
+
+    position: relative;
+    top: 3.5px;
+    right: 12px;
+
+    width: 10px;
+    height: 10px;
+
+    z-index: 10;
+}
+
+.speaker{
+    border-radius: 20px;
+    background-color: #191919;
+
+    border: 1px solid black;
+
+    width: 200px;
+    height: 10px;
 }

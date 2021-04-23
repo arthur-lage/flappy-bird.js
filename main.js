@@ -14,7 +14,7 @@ function isColliding(player, objectToCollideWith) {
   const playerVerticalPosition = player.y + player.height;
   const groundVerticalPosition = objectToCollideWith.y;
 
-  if (playerVerticalPosition > groundVerticalPosition) {
+  if (playerVerticalPosition > groundVerticalPosition - 10) {
     return true;
   }
 
@@ -36,8 +36,8 @@ function createFlappyBird() {
       if (isColliding(flappyBird, globais.ground)) {
         hitSound.play();
         setTimeout(() => {
-          changeScene(scenes.startScene);
-        }, 500);
+          changeScene(scenes.gameOver);
+        }, 100);
         return;
       }
 
@@ -190,101 +190,150 @@ const getReadyMessage = {
 };
 
 function criaCanos() {
-    const canos = {
-      largura: 52,
-      altura: 400,
-      chao: {
-        spriteX: 0,
-        spriteY: 169,
-      },
-      ceu: {
-        spriteX: 52,
-        spriteY: 169,
-      },
-      espaco: 80,
-      desenha() {
-        canos.pares.forEach(function(par) {
-          const yRandom = par.y;
-          const espacamentoEntreCanos = 90;
-    
-          const canoCeuX = par.x;
-          const canoCeuY = yRandom; 
-  
-          // [Cano do Céu]
-          ctx.drawImage(
-            sprites, 
-            canos.ceu.spriteX, canos.ceu.spriteY,
-            canos.largura, canos.altura,
-            canoCeuX, canoCeuY,
-            canos.largura, canos.altura,
-          )
-          
-          // [Cano do Chão]
-          const canoChaoX = par.x;
-          const canoChaoY = canos.altura + espacamentoEntreCanos + yRandom; 
-          ctx.drawImage(
-            sprites, 
-            canos.chao.spriteX, canos.chao.spriteY,
-            canos.largura, canos.altura,
-            canoChaoX, canoChaoY,
-            canos.largura, canos.altura,
-          )
-  
-          par.canoCeu = {
-            x: canoCeuX,
-            y: canos.altura + canoCeuY
-          }
-          par.canoChao = {
-            x: canoChaoX,
-            y: canoChaoY
-          }
-        })
-      },
-      temColisaoComOFlappyBird(par) {
-        const cabecaDoFlappy = globais.flappyBird.y;
-        const peDoFlappy = globais.flappyBird.y + globais.flappyBird.height;
-        
-        if((globais.flappyBird.x + globais.flappyBird.width) >= par.x) {
-          if(cabecaDoFlappy <= par.canoCeu.y) {
-            return true;
-          }
-  
-          if(peDoFlappy >= par.canoChao.y) {
-            return true;
-          }
+  const canos = {
+    largura: 52,
+    altura: 400,
+    chao: {
+      spriteX: 0,
+      spriteY: 169,
+    },
+    ceu: {
+      spriteX: 52,
+      spriteY: 169,
+    },
+    espaco: 80,
+    desenha() {
+      canos.pares.forEach(function (par) {
+        const yRandom = par.y;
+        const espacamentoEntreCanos = 90;
+
+        const canoCeuX = par.x;
+        const canoCeuY = yRandom;
+
+        // [Cano do Céu]
+        ctx.drawImage(
+          sprites,
+          canos.ceu.spriteX,
+          canos.ceu.spriteY,
+          canos.largura,
+          canos.altura,
+          canoCeuX,
+          canoCeuY,
+          canos.largura,
+          canos.altura
+        );
+
+        // [Cano do Chão]
+        const canoChaoX = par.x;
+        const canoChaoY = canos.altura + espacamentoEntreCanos + yRandom;
+        ctx.drawImage(
+          sprites,
+          canos.chao.spriteX,
+          canos.chao.spriteY,
+          canos.largura,
+          canos.altura,
+          canoChaoX,
+          canoChaoY,
+          canos.largura,
+          canos.altura
+        );
+
+        par.canoCeu = {
+          x: canoCeuX,
+          y: canos.altura + canoCeuY,
+        };
+        par.canoChao = {
+          x: canoChaoX,
+          y: canoChaoY,
+        };
+      });
+    },
+    temColisaoComOFlappyBird(par) {
+      const cabecaDoFlappy = globais.flappyBird.y;
+      const peDoFlappy = globais.flappyBird.y + globais.flappyBird.height;
+
+      if (globais.flappyBird.x + globais.flappyBird.width - 5 >= par.x) {
+        if (cabecaDoFlappy <= par.canoCeu.y) {
+          return true;
         }
-        return false;
-      },
-      pares: [],
-      atualiza() {
-        const passou100Frames = frames % 100 === 0;
-        if(passou100Frames) {
-          console.log('Passou 100 frames');
-          canos.pares.push({
-            x: canvas.width,
-            y: -150 * (Math.random() + 1),
-          });
+
+        if (peDoFlappy >= par.canoChao.y) {
+          return true;
         }
-  
-        canos.pares.forEach(function(par) {
-          par.x = par.x - 2;
-  
-          if(canos.temColisaoComOFlappyBird(par)) {
-            console.log('Você perdeu!')
-            hitSound.play();
-            changeScene(scenes.startScene);
-          }
-  
-          if(par.x + canos.largura <= 0) {
-            canos.pares.shift();
-          }
-        });
-  
       }
+      return false;
+    },
+    pares: [],
+    atualiza() {
+      const passou100Frames = frames % 100 === 0;
+      if (passou100Frames) {
+        canos.pares.push({
+          x: canvas.width,
+          y: -150 * (Math.random() + 1),
+        });
+      }
+
+      canos.pares.forEach(function (par) {
+        par.x = par.x - 2;
+
+        if (canos.temColisaoComOFlappyBird(par)) {
+          hitSound.play();
+          changeScene(scenes.gameOver);
+        }
+
+        if (par.x + canos.largura <= 0) {
+          canos.pares.shift();
+        }
+      });
+    },
+  };
+
+  return canos;
+}
+
+function createScore(){
+    const score = {
+        scorePoints: 0,
+        draw(){
+            ctx.font = '35px "VT323"';
+            ctx.textAlign = 'right';
+            ctx.fillStyle = "#FFF"
+            ctx.fillText(score.scorePoints, canvas.width - 10, 35)
+        },
+        update(){
+            const framesInterval = 10;
+            const hasReachedFramesInterval = frames % framesInterval === 0;
+
+            if(hasReachedFramesInterval){
+                score.scorePoints++;
+            }
+        }
     }
-  
-    return canos;
-  }
+
+    return score;
+}
+    
+const gameOverMessage = {
+    spriteX: 134,
+    spriteY: 153,
+    width: 226,
+    height: 200,
+    x: canvas.width / 2 - 226 / 2,
+    y: 50,
+    draw() {
+        ctx.drawImage(
+        sprites,
+        gameOverMessage.spriteX,
+        gameOverMessage.spriteY,
+        gameOverMessage.width,
+        gameOverMessage.height,
+        gameOverMessage.x,
+        gameOverMessage.y,
+        gameOverMessage.width,
+        gameOverMessage.height
+        );
+    },
+}
 
 //
 // Scenes
@@ -325,11 +374,15 @@ const scenes = {
 };
 
 scenes.gameScene = {
+  initialize() {
+      globais.score = createScore();
+  },
   draw() {
     background.draw();
     globais.canos.desenha();
     globais.ground.draw();
     globais.flappyBird.draw();
+    globais.score.draw();
   },
   click() {
     globais.flappyBird.jump();
@@ -338,8 +391,21 @@ scenes.gameScene = {
     globais.canos.atualiza();
     globais.ground.update();
     globais.flappyBird.update();
+    globais.score.update();
   },
 };
+
+scenes.gameOver = {
+    draw(){
+        gameOverMessage.draw();
+    },
+    click(){
+        changeScene(scenes.startScene);
+    },
+    update() {
+
+    }
+}
 
 function loop() {
   activeScene.draw();
@@ -351,6 +417,12 @@ function loop() {
 
 window.addEventListener("click", () => {
   if (activeScene.click()) {
+    activeScene.click();
+  }
+});
+
+window.addEventListener("keypress", (e) => {
+  if (e.code === "Space") {
     activeScene.click();
   }
 });
